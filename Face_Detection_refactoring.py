@@ -78,11 +78,13 @@ class face_detection():
 												shuffle=True,
 												num_workers = 0)
 		print("train loader:/n",trainloader,"/n")
+		return trainloader
 
 	## classラベルをデータセットから読み取る
 	def read_label_from_dataset(self, train_dataset):
 		classes = [key for key in  train_dataset.class_to_idx]
 		print("classes:/n",classes,"/n")
+		return classes
 
 	## gpuが使える場合はgpu、そうでない場合はcpuをデバイスに指定
 	def specifying_the_device_to_use(self):
