@@ -30,7 +30,7 @@ class face_detection():
 	## 各種設定
 		self.now_str = datetime.datetime.strftime('%Y%m%d-%H%M')
 		self.n_epochs = 20
-		self.batchsize = 8
+		self.batch_size = 8
 		self.learning_rate = 0.001
 
 		self.TRAIN_DATA_PATH = "./Input/train"
@@ -43,7 +43,7 @@ class face_detection():
 
 # ====================== 前処理 ======================
 	## データセットの画像加工用 Transform を作成
-	def crete_transform(self):
+	def crete_transform(self) -> dict:
 		transform = {
 			'Train':transforms.Compose(
 			[transforms.Resize(226), # 画像サイズを一定にする
@@ -59,7 +59,8 @@ class face_detection():
 		return transform
 
 	## Dataset を作成
-	def create_dataset(self, TRAIN_DATA_PATH, transform):
+	def create_dataset(self, transform):
+		TRAIN_DATA_PATH = self.TRAIN_DATA_PATH
 		train_dataset = ImageFolder(TRAIN_DATA_PATH, transform['Train'])
 		print("train dataset:/n",train_dataset,"/n")
 
@@ -68,11 +69,12 @@ class face_detection():
 		print("train dateset length:/n",datapoints,"/n")
 		print("train dataset class to idx:/n",train_dataset.class_to_idx,"/n")
 
-		return train_dataset
+		return datapoints, train_dataset
 
 # ====================== Dataloader を作成 ======================
 	## 学習データはエポックごとに各バッチの傾向が変わる（学習の傾向が変わる）ようにshuffleする
-	def create_dataloader(self, train_dataset, batch_size):
+	def create_dataloader(self, train_dataset):
+		batch_size = self.batch_size
 		trainloader = torch.utils.data.DataLoader(train_dataset,
 												batch_size = batch_size,
 												shuffle=True,
@@ -93,7 +95,12 @@ class face_detection():
 		return device
 
 # ====================== 学習 ======================
-	def train(self, ):
+	def train(self, datapoints, trainloader, device):
+		learning_rate = self.learning_rate
+		batch_size = self.batch_size
+		PRINT_COUNT_PER_EPOCH = self.PRINT_COUNT_PER_EPOCH
+		n_epochs = self.n_epochs
+
 		model = torchvision.models.efficientnet_b7(pretrained = True) # efficientnet_b7を使用
 		model.classifier = nn.Sequential(
 					nn.Dropout(p=0.5, inplace=True),
@@ -116,7 +123,7 @@ class face_detection():
 		results_train = {'loss': [],'accuracy': []}
 
 		# 1エポックごとの反復回数（iteration）
-		iteration = datapoints / batchsize
+		iteration = datapoints / batch_size
 		# 何iterationごとにprintするか
 		print_iteration = iteration // PRINT_COUNT_PER_EPOCH
 
@@ -153,8 +160,8 @@ class face_detection():
 				_, predicted = torch.max(outputs.data, 1)
 				# predictedとlabelsが一致する個数が予測に正解している数correct
 				correct = (predicted == labels).sum()
-				# batchsizeで割ることで精度にし、%にする
-				accuracy = 100 * correct / batchsize
+				# batch_sizeで割ることで精度にし、%にする
+				accuracy = 100 * correct / batch_size
 				# accuracyの加算
 				running_accuracy += accuracy.item()
 				# print_iterationごとのprint
@@ -170,52 +177,84 @@ class face_detection():
 					# print iteration毎に変数初期化
 					running_loss = 0.0
 					running_accuracy = 0.0
+		return model, results_train
 
 # ====================== モデルの保存 ======================
-#torch.save(model.state_dict(),'model.pth')
-torch.save(model.state_dict(), BASE_OUT_PATH + MODEL_OUT_NAME)
+	def save_model(self, model):
+		BASE_OUT_PATH = self.BASE_OUT_PATH
+		MODEL_OUT_NAME = self.MODEL_OUT_NAME
+		#torch.save(model.state_dict(),'model.pth')
+		torch.save(model.state_dict(), BASE_OUT_PATH + MODEL_OUT_NAME)
 
 # ======================結果の表示 ======================
-# 台紙を作成
-# facecolorはグラフ全体の背景色を設定
-# dpiで解像度が変わる
-fig = plt.figure(figsize=(6.4, 4.8), dpi=200, facecolor='w')
+	def display_results(self, results_train):
+		n_epochs = self.n_epochs
+		BASE_OUT_PATH = self.BASE_OUT_PATH
 
-# 上下に2つのグラフを用意
-# ylim=(0, 100)のように引数を指定すれば表示範囲が0～100になる
-# 見やすい範囲については各自で考える
-axT = fig.add_subplot(211,xlabel='epoch',ylabel='loss')#2行1列の1番目
-axB = fig.add_subplot(212,xlabel='epoch',ylabel='accuracy')#2行1列の2番目
+		# 台紙を作成
+		# facecolorはグラフ全体の背景色を設定
+		# dpiで解像度が変わる
+		fig = plt.figure(figsize=(6.4, 4.8), dpi=200, facecolor='w')
 
-# x軸の要素は、今回epochなので指定しなくても良いが念のため
-epochs = range(n_epochs)
+		# 上下に2つのグラフを用意
+		# ylim=(0, 100)のように引数を指定すれば表示範囲が0～100になる
+		# 見やすい範囲については各自で考える
+		axT = fig.add_subplot(211,xlabel='epoch',ylabel='loss')#2行1列の1番目
+		axB = fig.add_subplot(212,xlabel='epoch',ylabel='accuracy')#2行1列の2番目
 
-# epochは整数なので整数表示のためのオプション
-# この行を実行しないとx軸が実数表示になるはず
-axT.xaxis.set_major_locator(MaxNLocator(integer=True))
-axB.xaxis.set_major_locator(MaxNLocator(integer=True))
+		# x軸の要素は、今回epochなので指定しなくても良いが念のため
+		epochs = range(n_epochs)
 
-# プロット
-axT.plot(epochs, results_train['loss'])
-axB.plot(epochs, results_train['accuracy'])
+		# epochは整数なので整数表示のためのオプション
+		# この行を実行しないとx軸が実数表示になるはず
+		axT.xaxis.set_major_locator(MaxNLocator(integer=True))
+		axB.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-# 軸ラベルと図が被ることを防止
-fig.tight_layout()
-# 画像として保存
-fig.savefig(BASE_OUT_PATH + 'loss_acc.png', facecolor=fig.get_facecolor())
+		# プロット
+		axT.plot(epochs, results_train['loss'])
+		axB.plot(epochs, results_train['accuracy'])
+
+		# 軸ラベルと図が被ることを防止
+		fig.tight_layout()
+		# 画像として保存
+		fig.savefig(BASE_OUT_PATH + 'loss_acc.png', facecolor=fig.get_facecolor())
 
 # ====================== テスト ======================
-test_dataset = ImageFolder(TEST_DATA_PATH, transform['Test'])
-print("test dataset class to idx:/n",test_dataset.class_to_idx,"/n")
-test_samples = len(test_dataset)
-print("test samples:/n",test_samples,"/n")
+	def test(self, transform):
+		TEST_DATA_PATH = self.TEST_DATA_PATH
+		test_dataset = ImageFolder(TEST_DATA_PATH, transform['Test'])
+		print("test dataset class to idx:/n",test_dataset.class_to_idx,"/n")
+		test_samples = len(test_dataset)
+		print("test samples:/n",test_samples,"/n")
 
-# classラベルをデータセットから読み取る
-classes = [key for key in  test_dataset.class_to_idx]
-print("classes:/n",classes,"/n")
+		# classラベルをデータセットから読み取る
+		classes = [key for key in  test_dataset.class_to_idx]
+		print("classes:/n",classes,"/n")
 
-test_batchsize = 5
-# テストデータは全部のデータに同じことをするだけなので普通はsuffleしない
-testloader = torch.utils.data.DataLoader(test_dataset, batch_size=test_batchsize,
-                                        shuffle=False, num_workers = 2)
-print("test loader:/n",testloader,"/n")
+		test_batch_size = 5
+		# テストデータは全部のデータに同じことをするだけなので普通はsuffleしない
+		testloader = torch.utils.data.DataLoader(test_dataset, batch_size=test_batch_size,
+												shuffle=False, num_workers = 2)
+		print("test loader:/n",testloader,"/n")
+
+	def main(self):
+		# 前処理
+		transform = self.crete_transform()
+		datapoints, train_dataset = self.create_dataset(transform)
+		# Dataloaderを作成
+		trainloader = self.create_dataloader(train_dataset)
+		classes = self.read_label_from_dataset(train_dataset)
+		device = self.specifying_the_device_to_use()
+		# 学習
+		model, results_train = self.train(datapoints, trainloader, device)
+		# モデルの保存
+		self.save_model(model)
+		# 結果の表示
+		self.display_results(results_train)
+		# テスト
+		self.test(transform)
+
+if __name__ == "__main__":
+	obj = face_detection()
+	obj.main()
+	print('All process has been completed !')
