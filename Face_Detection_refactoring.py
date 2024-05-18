@@ -51,12 +51,12 @@ class face_detection():
 	## Dataset を作成
 	def create_dataset(self, transform):
 		train_dataset = ImageFolder(self.TRAIN_DATA_PATH, transform['Train'])
-		print("train dataset:/n",train_dataset,"/n")
+		print("train dataset:\n",train_dataset,"\n")
 
 		datapoints = len(train_dataset)
 
-		print("train dateset length:/n",datapoints,"/n")
-		print("train dataset class to idx:/n",train_dataset.class_to_idx,"/n")
+		print("train dateset length:\n",datapoints,"\n")
+		print("train dataset class to idx:\n",train_dataset.class_to_idx,"\n")
 
 		return datapoints, train_dataset
 
@@ -68,13 +68,13 @@ class face_detection():
 												batch_size = batch_size,
 												shuffle=True,
 												num_workers = 0)
-		print("train loader:/n",trainloader,"/n")
+		print("train loader:\n",trainloader,"\n")
 		return trainloader
 
 	## classラベルをデータセットから読み取る
 	def read_label_from_dataset(self, train_dataset):
 		classes = [key for key in  train_dataset.class_to_idx]
-		print("classes:/n",classes,"/n")
+		print("classes:\n",classes,"\n")
 		return classes
 
 	## gpuが使える場合はgpu、そうでない場合はcpuをデバイスに指定
@@ -207,18 +207,18 @@ class face_detection():
 # ====================== テスト ======================
 	def test(self, transform):
 		test_dataset = ImageFolder(self.TEST_DATA_PATH, transform['Test'])
-		print("test dataset class to idx:/n",test_dataset.class_to_idx,"/n")
+		print("test dataset class to idx:\n",test_dataset.class_to_idx,"\n")
 		test_samples = len(test_dataset)
-		print("test samples:/n",test_samples,"/n")
+		print("test samples:\n",test_samples,"\n")
 
 		# classラベルをデータセットから読み取る
 		classes = [key for key in  test_dataset.class_to_idx]
-		print("classes:/n",classes,"/n")
+		print("classes:\n",classes,"\n")
 
 		test_batch_size = 5
 		# テストデータは全部のデータに同じことをするだけなので普通はsuffleしない
 		testloader = torch.utils.data.DataLoader(test_dataset, batch_size=test_batch_size, shuffle=False, num_workers = 2)
-		print("test loader:/n",testloader,"/n")
+		print("test loader:\n",testloader,"\n")
 
 # ====================== main ======================
 	def main(self):
