@@ -1,29 +1,19 @@
 # ====================== 各種Import ======================
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-from pathlib import Path
-import os, datetime
-
-from tqdm.notebook import tqdm
-from tqdm import tqdm
+import datetime
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
 
 import torchvision
 import torchvision.models
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
-import cv2
-import albumentations as A
-
-# ======================
 class face_detection():
 # ====================== コンストラクタ ======================
 	def __init__(self):
@@ -60,8 +50,7 @@ class face_detection():
 
 	## Dataset を作成
 	def create_dataset(self, transform):
-		TRAIN_DATA_PATH = self.TRAIN_DATA_PATH
-		train_dataset = ImageFolder(TRAIN_DATA_PATH, transform['Train'])
+		train_dataset = ImageFolder(self.TRAIN_DATA_PATH, transform['Train'])
 		print("train dataset:/n",train_dataset,"/n")
 
 		datapoints = len(train_dataset)
@@ -94,44 +83,39 @@ class face_detection():
 		print("use device:",device)
 		return device
 
-# ====================== 学習 ======================
-	def train(self, datapoints, trainloader, device):
-		learning_rate = self.learning_rate
-		batch_size = self.batch_size
-		PRINT_COUNT_PER_EPOCH = self.PRINT_COUNT_PER_EPOCH
-		n_epochs = self.n_epochs
-
+# ====================== Train ======================
+	## モデルのセットアップ
+	def setup_model(self, device):
 		model = torchvision.models.efficientnet_b7(pretrained = True) # efficientnet_b7を使用
 		model.classifier = nn.Sequential(
 					nn.Dropout(p=0.5, inplace=True),
 					nn.Linear(2560, 2),
 				)
-
-		print("model:/n",model,"/n")
-		# 学習モードに切り替える
-		model.train()
-		# モデルをdeviceに送る。CPUで動かしたい時はやらなくても良い。
 		model.to(device)
-		#optimizer = optim.SGD(model.parameters(), lr = learning_rate, momentum=0.9) #最適化関数
-		optimizer = optim.Adam(model.parameters(), lr = learning_rate,betas=(0.9,0.999)) #最適化関数にはAdamを使用
-		print("optimizer:/n",optimizer,"/n")
+		return model
 
-		criterion = nn.CrossEntropyLoss() #損失関数-CrossEntropyLoss
-		print("criterion:/n",criterion,"/n")
+	## setup_optimizer_and_criterion
+	def setup_optimizer_and_criterion(self, model):
+		optimizer = optim.Adam(model.parameters(), lr = self.learning_rate,betas=(0.9,0.999)) #最適化関数にはAdamを使用
+		criterion = nn.CrossEntropyLoss() #損失関数
+		return optimizer, criterion
 
+	## train_loop
+	def train_loop(self, datapoints, device, model, trainloader, optimizer, criterion):
 		# 各エポックで最後にprintした値をグラフ表示用に格納しておくためのもの
 		results_train = {'loss': [],'accuracy': []}
 
 		# 1エポックごとの反復回数（iteration）
-		iteration = datapoints / batch_size
+		iteration = datapoints / self.batch_size
+
 		# 何iterationごとにprintするか
-		print_iteration = iteration // PRINT_COUNT_PER_EPOCH
+		print_iteration = iteration // self.PRINT_COUNT_PER_EPOCH
 
 		print('[epoch, iteration]')
 
 		# training loop
-		for epoch in range(n_epochs):
-		#list for loss and accuracy
+		for epoch in range(self.n_epochs):
+			#list for loss and accuracy
 			running_loss = 0.0
 			running_accuracy = 0.0
 
@@ -143,6 +127,7 @@ class face_detection():
 				images, labels = data
 				images = images.to(device)
 				labels = labels.to(device)
+
 				# forwardを実行
 				# 特殊なメソッドなのでmodel.forward()のように書かなくてもmodel()で実行されるようになっている
 				outputs = model(images)
@@ -152,20 +137,24 @@ class face_detection():
 				loss.backward()
 				optimizer.step()
 
-				# calculate print loss and accuracy
 				# lossの加算
 				running_loss += loss.item()
 
 				# outputsの各バッチで何番目のクラスの確率が最大かをpredictedに格納
 				_, predicted = torch.max(outputs.data, 1)
+
 				# predictedとlabelsが一致する個数が予測に正解している数correct
 				correct = (predicted == labels).sum()
+
 				# batch_sizeで割ることで精度にし、%にする
-				accuracy = 100 * correct / batch_size
+				accuracy = 100 * correct / self.batch_size
+
 				# accuracyの加算
 				running_accuracy += accuracy.item()
+
 				# print_iterationごとのprint
 				if i % print_iteration == print_iteration - 1:
+
 					# 加算したlossとaccuracyを反復数で割る
 					# 一番最後のprintした値で常に上書きすれば、各epohで最後にprintした値が取得できる
 					results_train['loss'][epoch] = running_loss / print_iteration
@@ -177,20 +166,16 @@ class face_detection():
 					# print iteration毎に変数初期化
 					running_loss = 0.0
 					running_accuracy = 0.0
+
 		return model, results_train
 
 # ====================== モデルの保存 ======================
 	def save_model(self, model):
-		BASE_OUT_PATH = self.BASE_OUT_PATH
-		MODEL_OUT_NAME = self.MODEL_OUT_NAME
 		#torch.save(model.state_dict(),'model.pth')
-		torch.save(model.state_dict(), BASE_OUT_PATH + MODEL_OUT_NAME)
+		torch.save(model.state_dict(), self.BASE_OUT_PATH + self.MODEL_OUT_NAME)
 
 # ======================結果の表示 ======================
 	def display_results(self, results_train):
-		n_epochs = self.n_epochs
-		BASE_OUT_PATH = self.BASE_OUT_PATH
-
 		# 台紙を作成
 		# facecolorはグラフ全体の背景色を設定
 		# dpiで解像度が変わる
@@ -203,7 +188,7 @@ class face_detection():
 		axB = fig.add_subplot(212,xlabel='epoch',ylabel='accuracy')#2行1列の2番目
 
 		# x軸の要素は、今回epochなので指定しなくても良いが念のため
-		epochs = range(n_epochs)
+		epochs = range(self.n_epochs)
 
 		# epochは整数なので整数表示のためのオプション
 		# この行を実行しないとx軸が実数表示になるはず
@@ -217,12 +202,11 @@ class face_detection():
 		# 軸ラベルと図が被ることを防止
 		fig.tight_layout()
 		# 画像として保存
-		fig.savefig(BASE_OUT_PATH + 'loss_acc.png', facecolor=fig.get_facecolor())
+		fig.savefig(self.BASE_OUT_PATH + self.now_str + '_loss_acc.png', facecolor=fig.get_facecolor())
 
 # ====================== テスト ======================
 	def test(self, transform):
-		TEST_DATA_PATH = self.TEST_DATA_PATH
-		test_dataset = ImageFolder(TEST_DATA_PATH, transform['Test'])
+		test_dataset = ImageFolder(self.TEST_DATA_PATH, transform['Test'])
 		print("test dataset class to idx:/n",test_dataset.class_to_idx,"/n")
 		test_samples = len(test_dataset)
 		print("test samples:/n",test_samples,"/n")
@@ -233,25 +217,32 @@ class face_detection():
 
 		test_batch_size = 5
 		# テストデータは全部のデータに同じことをするだけなので普通はsuffleしない
-		testloader = torch.utils.data.DataLoader(test_dataset, batch_size=test_batch_size,
-												shuffle=False, num_workers = 2)
+		testloader = torch.utils.data.DataLoader(test_dataset, batch_size=test_batch_size, shuffle=False, num_workers = 2)
 		print("test loader:/n",testloader,"/n")
 
+# ====================== main ======================
 	def main(self):
-		# 前処理
+		# ====================== 前処理 ======================
 		transform = self.crete_transform()
 		datapoints, train_dataset = self.create_dataset(transform)
-		# Dataloaderを作成
+
+		# ====================== Dataloader を作成 ======================
 		trainloader = self.create_dataloader(train_dataset)
 		classes = self.read_label_from_dataset(train_dataset)
 		device = self.specifying_the_device_to_use()
-		# 学習
-		model, results_train = self.train(datapoints, trainloader, device)
-		# モデルの保存
+
+		# ====================== Train ======================
+		model = self.setup_model(device)
+		optimizer, criterion = self.setup_optimizer_and_criterion(model)
+		model, results_train = self.train_loop(datapoints, device, model, trainloader, optimizer, criterion)
+
+		# ====================== モデルの保存 ======================
 		self.save_model(model)
-		# 結果の表示
+
+		# ======================結果の表示 ======================
 		self.display_results(results_train)
-		# テスト
+
+		# ====================== テスト ======================
 		self.test(transform)
 
 if __name__ == "__main__":
