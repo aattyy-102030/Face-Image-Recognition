@@ -1,8 +1,8 @@
 # Portfolio : Face Image Recognition
 ## Repository Overview
-- モデル学習・予測用コード(.ipynb)
-- ↑で学習したモデル(.pth)
-- モデルの検証用コード(.ipynb)
+- Create_LearnedModel.py
+- model.pth
+- Val_Model.py
 - Readme(.md)
   - 構築したモデルの実行方法
 - Result(.md)
