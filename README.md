@@ -10,7 +10,7 @@
 - [RetinaFace](https://github.com/serengil/retinaface)
 
 ## ■使用データセット
-- [ ] (置き場検討)
+- [man-woman-detection](https://www.kaggle.com/datasets/gmlmrinalini/manwomandetection) (kaggle)
 
 ## ■各ファイル概要
 - Create_LearnedModel.py
@@ -26,7 +26,7 @@
 
 ## ■実行手順
 **1. データのダウンロード**<br>
-※置き場所検討<br>
+kaggleで公開されている[ man-woman-detection ](https://www.kaggle.com/datasets/gmlmrinalini/manwomandetection)をダウンロードしてください。<br>
 **2. "Create_LearnedModel.py"の実行**<br>
 **3. 結果の確認**<br>
 
