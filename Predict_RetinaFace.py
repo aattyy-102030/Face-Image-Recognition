@@ -4,15 +4,17 @@ import albumentations as A
 import cv2
 
 from Create_LearnedModel import face_detection
-import os#, glob
+import os, glob
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 class predict_retinaface():
 	def __init__(self) -> None:
 		self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 		self.retinaface_model = RetinaFace(device = self.device)
-		self.sample_img = "Sample_Image.jpg"
-		# self.sample_img = glob.glob("*.jpg","*.png")
+		# self.sample_img = "Sample_Image.jpg"
+		self.jpg = "*.jpg"
+		self.png = "*.png"
+		self.sample_imgs = [path for ext in ['jpg'.casefold(), 'png'.casefold()] for path in glob.glob('Sample_Image/*.{}'.format(ext))]
 
 	def check_output_dir(self):
 		instance = face_detection()
@@ -29,8 +31,8 @@ class predict_retinaface():
 		learned_model.to(self.device)
 		return learned_model
 
-	def annotate_faces(self, faces, learned_model):	# -> ndarray
-		image = cv2.imread(self.sample_img)
+	def annotate_faces(self, faces, img, learned_model):	# -> ndarray
+		image = cv2.imread(img)
 		for face in faces.values():
 			# 顔の座標を取得
 			x1, y1, x2, y2 = face['facial_area']
@@ -51,11 +53,13 @@ class predict_retinaface():
 		return image
 
 	def main(self):
+		imgs = self.sample_imgs
 		print("INFO: START prediction by RetinaFace. ")
-		self.check_output_dir()
-		faces = self.detect_faces()
-		learned_model = self.load_learned_model()
-		result_image = self.annotate_faces(faces, learned_model)
+		for img in imgs:
+			self.check_output_dir()
+			faces = self.detect_faces()
+			learned_model = self.load_learned_model()
+			result_image = self.annotate_faces(faces, img, learned_model)
 
 		cv2.imwrite('Sample_result.jpg', result_image)
 
