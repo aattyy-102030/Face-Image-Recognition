@@ -12,8 +12,8 @@ class predict_retinaface():
 		self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 		self.retinaface_model = RetinaFace(device = self.device)
 		# self.sample_img = "Sample_Image.jpg"
-		self.jpg = "*.jpg".casefold()
-		self.png = "*.png".casefold()
+		self.jpg = "jpg".casefold()
+		self.png = "png".casefold()
 		self.sample_imgs = [path for ext in [self.jpg, self.png] for path in glob.glob('Sample_Image/*.{}'.format(ext))]
 		self.now_str = datetime.datetime.now()
 
