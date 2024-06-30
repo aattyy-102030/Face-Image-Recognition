@@ -19,7 +19,7 @@ class face_detection():
 	def __init__(self):
 	## 各種設定
 		self.now_str = datetime.datetime.now().strftime('%Y%m%d-%H%M')
-		self.n_epochs = 20
+		self.n_epochs = 5
 		self.batch_size = 8
 		self.learning_rate = 0.001
 

@@ -1,4 +1,4 @@
-import os, glob, datetime
+import os, datetime
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 from retinaface import RetinaFace
 import torch
@@ -14,15 +14,13 @@ class predict_retinaface():
 	def __init__(self) -> None:
 		self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 		self.retinaface_model = RetinaFace
-		# self.sample_img = "Sample_Image.jpg"
 		self.files = os.listdir("./Sample_Image")
 		self.sample_imgs = [os.path.join("./Sample_Image", file) for file in self.files if file.lower().endswith(('.jpg', '.png'))]
 		self.now_str = datetime.datetime.now()
 
 	def check_output_dir(self):
-		# instance = face_detection()
-		# self.learned_model_path = instance.main()
-		self.learned_model_path = "model_20240613-2154.pth"
+		instance = face_detection()
+		self.learned_model_path = instance.main()
 		print(f"Output model path : {self.learned_model_path}")
 
 	def detect_faces(self, img):
