@@ -1,0 +1,71 @@
+train dataset:/n Dataset ImageFolder
+    Number of datapoints: 1615
+    Root location: ./Input/train
+    StandardTransform
+Transform: Compose(
+               Resize(size=226, interpolation=bilinear, max_size=None, antialias=None)
+               CenterCrop(size=(224, 224))
+               ToTensor()
+           ) /n
+train dateset length:/n 1615 /n
+train dataset class to idx:/n {'man': 0, 'woman': 1} /n
+train loader:/n <torch.utils.data.dataloader.DataLoader object at 0x000001F687537E20> /n
+classes:/n ['man', 'woman'] /n
+use device: cpu
+[epoch, iteration]
+[    1,        20]  loss: 0.458,  accuracy: 76.250
+[    1,        40]  loss: 0.465,  accuracy: 78.750
+[    1,        60]  loss: 0.418,  accuracy: 81.875
+[    1,        80]  loss: 0.249,  accuracy: 91.250
+[    1,       100]  loss: 0.141,  accuracy: 93.750
+[    1,       120]  loss: 0.198,  accuracy: 91.875
+[    1,       140]  loss: 0.313,  accuracy: 85.625
+[    1,       160]  loss: 0.254,  accuracy: 92.500
+[    1,       180]  loss: 0.224,  accuracy: 92.500
+[    1,       200]  loss: 0.173,  accuracy: 96.250
+[    2,        20]  loss: 0.107,  accuracy: 95.000
+[    2,        40]  loss: 0.148,  accuracy: 95.000
+[    2,        60]  loss: 0.141,  accuracy: 96.250
+[    2,        80]  loss: 0.063,  accuracy: 98.125
+[    2,       100]  loss: 0.162,  accuracy: 95.625
+[    2,       120]  loss: 0.116,  accuracy: 96.875
+[    2,       140]  loss: 0.115,  accuracy: 94.375
+[    2,       160]  loss: 0.158,  accuracy: 96.250
+[    2,       180]  loss: 0.188,  accuracy: 93.750
+[    2,       200]  loss: 0.120,  accuracy: 96.875
+[    3,        20]  loss: 0.164,  accuracy: 95.000
+[    3,        40]  loss: 0.220,  accuracy: 92.500
+[    3,        60]  loss: 0.112,  accuracy: 96.250
+[    3,        80]  loss: 0.109,  accuracy: 96.250
+[    3,       100]  loss: 0.095,  accuracy: 98.125
+[    3,       120]  loss: 0.023,  accuracy: 99.375
+[    3,       140]  loss: 0.013,  accuracy: 99.375
+[    3,       160]  loss: 0.018,  accuracy: 99.375
+[    3,       180]  loss: 0.113,  accuracy: 95.625
+[    3,       200]  loss: 0.183,  accuracy: 93.750
+[    4,        20]  loss: 0.176,  accuracy: 91.875
+[    4,        40]  loss: 0.154,  accuracy: 93.750
+[    4,        60]  loss: 0.207,  accuracy: 91.250
+[    4,        80]  loss: 0.109,  accuracy: 93.125
+[    4,       100]  loss: 0.090,  accuracy: 96.250
+[    4,       120]  loss: 0.030,  accuracy: 98.125
+[    4,       140]  loss: 0.190,  accuracy: 92.500
+[    4,       160]  loss: 0.044,  accuracy: 99.375
+[    4,       180]  loss: 0.104,  accuracy: 97.500
+[    4,       200]  loss: 0.057,  accuracy: 98.125
+[    5,        20]  loss: 0.082,  accuracy: 96.875
+[    5,        40]  loss: 0.030,  accuracy: 98.750
+[    5,        60]  loss: 0.034,  accuracy: 98.750
+[    5,        80]  loss: 0.035,  accuracy: 98.750
+[    5,       100]  loss: 0.085,  accuracy: 95.000
+[    5,       120]  loss: 0.024,  accuracy: 99.375
+[    5,       140]  loss: 0.052,  accuracy: 98.125
+[    5,       160]  loss: 0.129,  accuracy: 96.250
+[    5,       180]  loss: 0.065,  accuracy: 96.875
+[    5,       200]  loss: 0.068,  accuracy: 97.500
+test dataset class to idx:/n {'man': 0, 'woman': 1} /n
+test samples:/n 346 /n
+classes:/n ['man', 'woman'] /n
+test loader:/n <torch.utils.data.dataloader.DataLoader object at 0x000001F692FC00A0> /n
+All process has been completed !
+続行するには何かキーを押してください . . .

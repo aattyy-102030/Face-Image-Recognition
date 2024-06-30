@@ -19,7 +19,7 @@ class face_detection():
 	def __init__(self):
 	## 各種設定
 		self.now_str = datetime.datetime.now().strftime('%Y%m%d-%H%M')
-		self.n_epochs = 20
+		self.n_epochs = 5
 		self.batch_size = 8
 		self.learning_rate = 0.001
 
@@ -172,7 +172,9 @@ class face_detection():
 # ====================== モデルの保存 ======================
 	def save_model(self, model):
 		#torch.save(model.state_dict(),'model.pth')
-		torch.save(model.state_dict(), self.BASE_OUT_PATH + self.MODEL_OUT_NAME)
+		output_model_name = self.BASE_OUT_PATH + "/" + self.MODEL_OUT_NAME
+		torch.save(model.state_dict(), output_model_name)
+		return output_model_name
 
 # ======================結果の表示 ======================
 	def display_results(self, results_train):
@@ -237,13 +239,15 @@ class face_detection():
 		model, results_train = self.train_loop(datapoints, device, model, trainloader, optimizer, criterion)
 
 		# ====================== モデルの保存 ======================
-		self.save_model(model)
+		output_model_name = self.save_model(model)
 
 		# ======================結果の表示 ======================
 		self.display_results(results_train)
 
 		# ====================== テスト ======================
 		self.test(transform)
+
+		return output_model_name
 
 if __name__ == "__main__":
 	obj = face_detection()

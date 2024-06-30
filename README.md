@@ -10,24 +10,36 @@
 - [RetinaFace](https://github.com/serengil/retinaface)
 
 ## ■使用データセット
-- [ ] (置き場検討)
+- [man-woman-detection](https://www.kaggle.com/datasets/gmlmrinalini/manwomandetection) (kaggleより参照)
 
 ## ■各ファイル概要
 - Create_LearnedModel.py
-  <br>
   - データの前処理
   - モデルの学習
   - モデルの保存
   - モデルのテスト
-- model.pth
-  - 学習済みモデル
-- Result(.md)
+- Predict_RetinaFace.py
+  - RetinaFaceでの顔検出
+  - 検出した顔を, "Create_LearnedModel.py"で作成したモデルで分類
+  - 分類結果を画像として出力
+- requirements.txt
+  - 使用するパッケージ一覧
+- Result.md
   - 構築したモデルの解説, 検証結果
 
 ## ■実行手順
 **1. データのダウンロード**<br>
-※置き場所検討<br>
-**2. "Create_LearnedModel.py"の実行**<br>
-**3. 結果の確認**<br>
+kaggleで公開されている[ man-woman-detection ](https://www.kaggle.com/datasets/gmlmrinalini/manwomandetection)をダウンロードしてください。<br>
+**2. パッケージのインストール** <br>
+以下のコマンドを実行し、必要なパッケージをインストールしてください。
+  - pipの場合
+  ```
+  pip install -r requirements.txt
+  ```
+  - condaの場合
+  ```
+  conda install -r requirements.txt
+  ```
 
-## 今後の展望
+**3. "Predict_RetinaFace.py"の実行**<br>
+**4. 結果の確認**<br>
